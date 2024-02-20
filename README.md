@@ -69,6 +69,7 @@ They've made it harder to enable Developer Mode, but GeoPort handles it with eas
 ## Prerequisites
 
 An iOS device and a sense of adventure!
+*That's Right* - you do not need to install complex apps like python for **GeoPort** to work
 
 ## Installation
 
