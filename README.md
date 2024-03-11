@@ -1,6 +1,5 @@
-# COMING SOON - 2nd Feb 2024 - Almost ready!!
+# GeoPort: Your Location, Anywhere! 🌍 
 
-# GeoPort: Your Location, Anywhere in the World! 🌍🚁  🚀🌀 
 <p align="center">
   <a href="https://www.buymeacoffee.com/davesc63">
     <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=🍺&slug=davesc63&button_colour=FFDD00&font_colour=000000&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer">
@@ -39,12 +38,13 @@ Download now and elevate your location experience beyond boundaries. Teleportati
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport2.png" alt="geoport" width="50%">
+  <img src="https://s3.amazonaws.com/geoport.me/geoport-demo.gif" alt="geoport">
 </p>
 
 ## Fuel Mode:
 
 For the :australia: Aussies :australia: who love to fire up their choppers and get their *Frugal Fuels* from the KwikiMart.
-Download the **"Fuel"** version of GeoPort to easily select the best prices across Australia! There is even the ability to select **state-based** pricing
+the **"Fuel"** mode of GeoPort to easily select the best prices across Australia! There is even the ability to select **state-based** pricing
 
 <p align="center">
 <img src="https://github.com/davesc63/GeoPort/blob/main/images/fuel.png" alt="fuel" width="50%">
@@ -78,9 +78,8 @@ An iOS device and a sense of adventure!
 - Explore the world and **Simulate Location**
 
 ## App Notes
-- iOS 17 is supported!
-- It can take a bit of time to establish the secure tunnel required on iOS17 devices. Please be patient! A timeout message will pop up if there are any issues!
-- Sometimes iOS doesn't update your location immediately. It will happen
+- iOS 17 is supported on both Windows and Mac
+- Administrator / Sudo permissions are required for iOS17
 - If you forget to reset your location when you disconnect, Don't worry! Simply connect your device again and "Stop Location"
 
 ## Tech Stuff and recognition
