@@ -37,8 +37,8 @@ Seamlessly navigate GeoPort's intuitive interface. Set your desired location wit
 Download now and elevate your location experience beyond boundaries. Teleportation has never been this easy—**GeoPort**, where every location is just a click away!
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport2.png" alt="geoport" width="50%">
-  <img src="https://s3.amazonaws.com/geoport.me/geoport-demo.gif" alt="geoport">
+  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport2.png" alt="geoport" width="50%"><br><br>
+   <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport-demo.gif" alt="geoport">
 </p>
 
 ## Fuel Mode:
