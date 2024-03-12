@@ -89,6 +89,9 @@ Interface inspired by the popular iFakeLocation, GeoPort is built for familiarit
 Pymobiledevice3 - https://github.com/doronz88/pymobiledevice3<br>
 iFakeLocation - https://github.com/master131/iFakeLocation
 
+## Keywords
+iOS 17, location spoofing, ios17 location simulation, ios17 windows support
+
 ## Pay it forward
 If this tools helps you, please consider buying me a beer so I can keep this app going!<br>
 <p align="center">
