@@ -73,6 +73,9 @@ They've made it harder to enable Developer Mode, but GeoPort handles it with eas
 An iOS device and a sense of adventure!
 *That's Right* - you do not need to install complex apps like python for **GeoPort** to work
 
+**Windows Users**
+You will need to install iTunes (we need their USB service so we can discover the iOS device!)
+
 ## Installation
 
 - [Download](https://github.com/davesc63/GeoPort/releases/) the package for your operating system
