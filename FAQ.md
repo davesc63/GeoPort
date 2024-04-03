@@ -72,3 +72,7 @@ All - iOS 17 and below
 Windows 64-bit
 MacOS ARM
 MacOS Intel
+Linux - Ubuntu 22.04
+
+# Need more help?
+Please open an issue: https://github.com/davesc63/GeoPort/issues
