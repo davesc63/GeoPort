@@ -12,6 +12,7 @@
 
 <a href="https://github.com/davesc63/GeoPort/releases/tag/v2.1">Release Notes and Downloads</a><br><p>
 <a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">Need Help? - FAQ</a><br><p>
+<a href="https://www.surveymonkey.com/r/BLQ8M75">Your feedback helps - Fill out the Survey</a>
 
 <p align="center"><strong>GeoPort needs your help.</p></strong> </p>
 Please consider <strong>donating</strong> and supporting the project. Your support helps to grow the platform and features.<br><p></p><br><p></p>
