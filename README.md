@@ -10,7 +10,11 @@
 
 
 
-<a href="https://github.com/davesc63/GeoPort/releases/tag/v2.1">Release Notes and Downloads</a>
+<a href="https://github.com/davesc63/GeoPort/releases/tag/v2.1">Release Notes and Downloads</a><br><p>
+<a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">Need Help? - FAQ</a><br><p>
+
+<p align="center"><strong>GeoPort needs your help.</p></strong> </p>
+Please consider <strong>donating</strong> and supporting the project. Your support helps to grow the platform and features.<br><p></p><br><p></p>
 
 
 Immerse yourself in a world of possibilities with **GeoPort**, the ultimate location simulation app. GeoPort allows you to take control of your virtual presence, letting you be anywhere on the globe at the touch of a button. Whether you want to explore distant cities, surprise friends with exotic check-ins, or test location-based apps, GeoPort is your passport to a limitless world.
