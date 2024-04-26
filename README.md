@@ -9,6 +9,8 @@
 </p>
 
 
+<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support GeoPort', '#ebd934', 'Y8Y5XCS06');kofiwidget2.draw();</script> 
+
 
 
 <a href="https://github.com/davesc63/GeoPort/releases/tag/v2.1">Release Notes and Downloads</a>
