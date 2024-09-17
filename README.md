@@ -10,7 +10,7 @@
 
 
 
-<a href="https://github.com/davesc63/GeoPort/releases/tag/v2.1">Release Notes and Downloads</a><br><p>
+<a href="https://github.com/davesc63/GeoPort/releases/tag/v2.3.3">Release Notes and Downloads</a><br><p>
 <a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">Need Help? - FAQ</a><br><p>
 <a href="https://www.surveymonkey.com/r/BLQ8M75">Your feedback helps - Fill out the Survey</a>
 
@@ -87,7 +87,7 @@ You will need to install iTunes (we need their USB service so we can discover th
 - Explore the world and **Simulate Location**
 
 ## App Notes
-- iOS 17 is supported on both Windows and Mac
+- iOS 17 & iOS 18 are supported on both Windows and Mac
 - Administrator / Sudo permissions are required for iOS17
 - If you forget to reset your location when you disconnect, Don't worry! Simply connect your device again and "Stop Location"
 
@@ -99,7 +99,9 @@ Pymobiledevice3 - https://github.com/doronz88/pymobiledevice3<br>
 iFakeLocation - https://github.com/master131/iFakeLocation
 
 ## Keywords
-iOS 17, location spoofing, ios17 location simulation, ios17 windows support
+iOS 17, location spoofing, ios17 location simulation, ios17 windows support<br>
+iOS 18, location spoofing, ios18 location simulation, ios18 windows support
+
 
 ## Pay it forward
 If this tools helps you, please consider buying me a beer so I can keep this app going!<br>
