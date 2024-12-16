@@ -9,7 +9,7 @@
 </p>
 
 
-
+[![Join Discord](https://img.shields.io/badge/Discord-Join%20Us-7289DA?logo=discord&style=for-the-badge)](https://discord.gg/genRca55Nb)<br>
 <a href="https://github.com/davesc63/GeoPort/releases/tag/v3.0.0">Release Notes and Downloads</a><br><p>
 <a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">Need Help? - FAQ</a><br><p>
 <a href="https://www.surveymonkey.com/r/BLQ8M75">Your feedback helps - Fill out the Survey</a>
