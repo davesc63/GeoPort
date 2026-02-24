@@ -50,6 +50,8 @@ parser.add_argument('--no-browser', action='store_true', help='Skip auto opening
 parser.add_argument('--port', type=int, help='Specify port number to listen on for web browser requests')
 parser.add_argument('--wifihost', type=str, help='Specify the wifi IP address to connect to')
 parser.add_argument('--udid', type=str, help='Specify the device udid to target')
+parser.add_argument('--control-window', action='store_true', help='Force the GeoPort control window')
+parser.add_argument('--no-control-window', action='store_true', help='Disable the GeoPort control window')
 args = parser.parse_args()
 #========= Arg Parser ========
 
@@ -83,6 +85,7 @@ home_dir = os.path.expanduser("~")
 is_windows = sys.platform == 'win32'
 base_directory = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(sys.argv[0])))
 flask_port = 54321
+chosen_port = flask_port
 api_url = "https://projectzerothree.info/api.php?format=json"
 api_data = None
 user_locale = None
@@ -1410,10 +1413,26 @@ def index():
 
 
 def open_browser():
-    time.sleep(2)  # Wait for the Flask app to start
-    #webbrowser.open(f'http://localhost:{chosen_port}')
-    browser = webbrowser.get()
-    browser.open(f'http://localhost:{chosen_port}')
+    timeout_seconds = 15
+    wait_interval = 0.2
+    start_time = time.time()
+
+    while time.time() - start_time < timeout_seconds:
+        if is_port_in_use(chosen_port):
+            break
+        time.sleep(wait_interval)
+
+    open_ui_in_browser()
+
+
+def get_ui_url():
+    return f'http://localhost:{chosen_port}'
+
+
+def open_ui_in_browser():
+    ui_url = get_ui_url()
+    logger.info(f"Opening GeoPort UI: {ui_url}")
+    webbrowser.open_new_tab(ui_url)
 
 
 def is_port_in_use(port):
@@ -1445,6 +1464,43 @@ def try_bind_listener_on_free_port():
     return chosen_port
 
 
+def should_show_control_window():
+    if args.no_control_window:
+        return False
+    if args.control_window:
+        return True
+    return current_platform == "darwin" and bool(getattr(sys, 'frozen', False))
+
+
+def launch_control_window():
+    try:
+        import tkinter as tk
+        from tkinter import ttk
+    except Exception as e:
+        logger.warning(f"Control window unavailable: {e}")
+        return
+
+    root = tk.Tk()
+    root.title("GeoPort")
+    root.resizable(False, False)
+    root.attributes("-topmost", True)
+    root.after(500, lambda: root.attributes("-topmost", False))
+
+    frame = ttk.Frame(root, padding=12)
+    frame.pack(fill=tk.BOTH, expand=True)
+
+    ttk.Label(frame, text=f"GeoPort is running on {get_ui_url()}").pack(anchor=tk.W, pady=(0, 8))
+    ttk.Button(frame, text="Open UI", command=open_ui_in_browser).pack(fill=tk.X)
+    ttk.Button(frame, text="Exit GeoPort", command=shutdown_server).pack(fill=tk.X, pady=(8, 0))
+
+    root.protocol("WM_DELETE_WINDOW", root.destroy)
+    root.mainloop()
+
+
+def run_flask_server():
+    app.run(debug=True, use_reloader=False, port=chosen_port, host='0.0.0.0')
+
+
 if __name__ == '__main__':
     #create_geoport_folder()
     if is_windows:
@@ -1468,17 +1524,17 @@ if __name__ == '__main__':
 
     # Check if --no-browser flag is provided
     if not args.no_browser:
-        open_browser()
+        threading.Thread(target=open_browser, daemon=True).start()
     else:
         logger.info("--no-browser flag passed")
         logger.info("Running without auto-browser popup")
 
-
-
-    #threading.Thread(target=open_browser).start()
-
-    app.run(debug=True, use_reloader=False, port=chosen_port, host='0.0.0.0')
-
-
+    if should_show_control_window():
+        flask_thread = threading.Thread(target=run_flask_server, name="flask-server")
+        flask_thread.start()
+        launch_control_window()
+        flask_thread.join()
+    else:
+        run_flask_server()
 
 
