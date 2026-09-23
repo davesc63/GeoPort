@@ -91,6 +91,22 @@ You will need to install iTunes (we need their USB service so we can discover th
 - Administrator / Sudo permissions are required for iOS17
 - If you forget to reset your location when you disconnect, Don't worry! Simply connect your device again and "Stop Location"
 
+### Testing location simulation on iOS 27
+
+GeoPort's current packaged dependency uses an older `pymobiledevice3` API. If your USB-connected iOS 27 device connects but its location does not change, source builds can use a separate, up-to-date `pymobiledevice3` installation for the DVT call. This keeps the existing dependency in place for GeoPort's other device operations.
+
+Create a Python 3.13 environment, install `pymobiledevice3` 11.17 or newer, and set `GEOPORT_MODERN_PMD3_PYTHON` to that environment's Python executable before starting GeoPort. The phone must have Developer Mode enabled. GeoPort uses the bridge only for iOS 27 over USB; older iOS versions and other connection types keep their existing path. A packaged build can instead put a standalone `modern-location-bridge` executable in the macOS app's `Contents/Resources` directory, or set `GEOPORT_MODERN_BRIDGE_EXECUTABLE` to its path.
+
+For example, from the source directory on macOS:
+
+```sh
+python3.13 -m venv .venv-modern
+.venv-modern/bin/python -m pip install 'pymobiledevice3>=11.17,<12'
+GEOPORT_MODERN_PMD3_PYTHON="$PWD/.venv-modern/bin/python" python src/main.py
+```
+
+The "Simulate Location" response now waits for the DVT set call and reports an error if that call fails. As with any DVT response, a successful call alone cannot prove that the phone's Maps location changed; check the device to confirm.
+
 ## Tech Stuff and recognition
 GeoPort is built with python, flask and pymobiledevice3
 Interface inspired by the popular iFakeLocation, GeoPort is built for familiarity with the addition of iOS17 and Windows support (Windows release imminent)
