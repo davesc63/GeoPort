@@ -1,0 +1,15 @@
+GeoPort.log
+GeoPort.log.*
+__pycache__/
+*.pyc
+.env
+.venv/
+.pytest_cache/
+saved_locations.json
+
+# launcher stub build artifacts
+GeoPort.exe
+build-py/
+launcher-dist/
+.venv/
+launcher_trace.log

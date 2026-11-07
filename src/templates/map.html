@@ -3,6 +3,7 @@
 
 <head>
     <title>GeoPort</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='24' r='20' fill='%23109174'/%3E%3Cpath d='M22 38 L42 38 L32 58 Z' fill='%23109174'/%3E%3Ccircle cx='32' cy='24' r='8' fill='white'/%3E%3C/svg%3E">
 
     <script src="https://cdn.jsdelivr.net/npm/babel-polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.min.js"></script>
@@ -236,19 +237,18 @@ body.dark-mode .modal-footer button {
     </style>
 </head>
 
-<body>
-  {% if version_message %}
-        <div class="alert alert-warning" role="alert">
-            {{ version_message }}
-        </div>
-    {% endif %}
-
-  {% if github_broadcast %}
-    <div class="alert alert-info" role="alert">
-        {{ github_broadcast }}
-    </div>
-    {% endif %}
-
+<body class="dark-mode">
+<script>
+    // Dark mode is the default. Respect a previously saved light-mode
+    // preference (persisted by toggleDarkMode).
+    if (localStorage.getItem('geoportDarkMode') === 'off') {
+        document.body.classList.remove('dark-mode');
+        document.addEventListener('DOMContentLoaded', function () {
+            var s = document.getElementById('darkModeSwitch');
+            if (s) s.checked = false;
+        });
+    }
+</script>
 {% if timeout_message %}
         <div class="alert alert-warning" role="alert">
             {{ timeout_message }}
@@ -259,6 +259,10 @@ body.dark-mode .modal-footer button {
             {{ error_message }}
         </div>
     {% endif %}
+    <div id="tunnelBanner" class="alert alert-danger d-none" role="alert">
+        <strong>Connection to the device was lost.</strong> Location simulation has stopped.
+        <button id="tunnelReconnectBtn" class="btn btn-sm btn-outline-light ms-2" type="button" onclick="tunnelReconnect()">Reconnect</button>
+    </div>
 <p><br></p>
 
 <div class="d-flex flex-column align-items-center flex-md-row container">
@@ -272,7 +276,7 @@ body.dark-mode .modal-footer button {
 <!-- Dark Mode switch -->
 <div class="d-flex justify-content-md-end mt-3 container">
     <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" role="switch" id="darkModeSwitch" onchange="toggleDarkMode()">
+        <input class="form-check-input" type="checkbox" role="switch" id="darkModeSwitch" onchange="toggleDarkMode()" checked>
         <label class="form-check-label" for="darkModeSwitch">Dark Mode</label>
 
     </div>
@@ -515,6 +519,23 @@ L.leafletMenu = function(a, b) {
     var map = null;
     var marker = null;
 
+    // Optional API token (server-side GEOPORT_TOKEN env var). Attach it to
+    // every same-origin API call so remote/headless callers can authenticate.
+    window.GEOPORT_TOKEN = "{{ api_token }}";
+    (function () {
+        var origFetch = window.fetch;
+        window.fetch = function (url, opts) {
+            try {
+                if (window.GEOPORT_TOKEN && typeof url === 'string' && url.startsWith('/')) {
+                    opts = opts || {};
+                    var headers = Object.assign({}, opts.headers, { 'X-GeoPort-Token': window.GEOPORT_TOKEN });
+                    return origFetch.call(window, url, Object.assign({}, opts, { headers: headers }));
+                }
+            } catch (e) { /* fall through to plain fetch */ }
+            return origFetch.call(window, url, opts);
+        };
+    })();
+
     var connectTextElement = document.getElementById('connectText');
     var rsdDataElement = document.getElementById('rsdData');
     var appVersionNum = "{{ app_version_num }}";
@@ -524,32 +545,9 @@ L.leafletMenu = function(a, b) {
     console.log("App Type: ", appVersionType);
     console.log("Platform: ", selectedDevicePlatform);
 
-      // Record app_visit when the page loads
-      //document.addEventListener('DOMContentLoaded', () => recordEvent('beta_visit'));
-
-      async function recordEvent(eventName) {
-        const apiUrl = 'https://api.geoport.me/';
-
-        try {
-          const response = await fetch(apiUrl + selectedDevicePlatform, {
-            mode: 'no-cors',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              path: window.location.pathname,
-              [eventName]: true,
-            }),
-          });
-
-          if (!response.ok) {
-            console.error('Failed to record event:', response.status, response.statusText);
-          }
-        } catch (error) {
-          console.error('Error recording event:', error.message);
-        }
-      }
+    // Tracks whether a location is currently being simulated on the device.
+    let activeSpoofLocation = null;
+    let pendingSpoofLocation = null;
 
     // Function to toggle Dark Mode
     function toggleDarkMode() {
@@ -564,6 +562,11 @@ L.leafletMenu = function(a, b) {
         // Disable Dark Mode
         document.body.classList.remove("dark-mode");
       }
+
+      // Remember the choice so page reloads keep the preferred mode
+      try {
+        localStorage.setItem('geoportDarkMode', darkModeSwitch.checked ? 'on' : 'off');
+      } catch (e) {}
     }
 
 
@@ -617,6 +620,153 @@ var velocitySelectVisible = false;
 // Define a global variable to store the time to next point
 var timeToNextPoint = 'N/A';
 var velocitySelect = 'walk';
+
+// ============ Server-side route playback (issue #137) =====================
+// The server walks the route (one RSD session for the whole route); the
+// browser only follows the marker and reports progress.
+let routePlayback = { active: false, holding: false, lastIndex: -1, timer: null };
+
+function routeSpeedKmh() {
+    var speeds = { walk: 6, run: 12, ride: 20, drive: 50 };
+    return speeds[velocitySelect] || 6;
+}
+
+function startRoutePolling() {
+    stopRoutePolling();
+    routePlayback.timer = setInterval(pollRouteStatus, 1000);
+    pollRouteStatus();
+}
+
+function stopRoutePolling() {
+    if (routePlayback.timer) { clearInterval(routePlayback.timer); routePlayback.timer = null; }
+}
+
+function pollRouteStatus() {
+    fetch('/route_status').then(r => r.json()).then(st => {
+        if (!st.active) {
+            stopRoutePolling();
+            routePlayback.active = false;
+            var done = st.finished && !st.error;
+            if (st.error) {
+                displayToast('Route error: ' + st.error);
+            } else if (st.finished) {
+                displayToast('Route complete');
+            }
+            routePlayback.holding = false;
+            wasPlaybackPaused = false;
+            isPlaybackStopped = true;
+            if (typeof playbackButton !== 'undefined' && playbackButton) { playbackButton.state('play'); }
+            return;
+        }
+        if (st.current && st.index > routePlayback.lastIndex) {
+            routePlayback.lastIndex = st.index;
+            if (!gpxMarker || !map.hasLayer(gpxMarker)) {
+                gpxMarker = L.marker([st.current.lat, st.current.lng], { icon: orangeIcon }).addTo(drawnItems);
+            } else {
+                gpxMarker.setLatLng([st.current.lat, st.current.lng]);
+            }
+            map.fire('playbackchange');
+        }
+    }).catch(() => {});
+}
+
+// On page load: a route may already be walking server-side (e.g. after a
+// page refresh mid-route).
+function restoreRouteState() {
+    fetch('/route_status').then(r => r.json()).then(st => {
+        if (st.active && st.points > 0) {
+            isPlaybackStopped = false;
+            wasPlaybackPaused = false;
+            routePlayback.active = true;
+            routePlayback.lastIndex = st.index;
+            if (typeof playbackButton !== 'undefined' && playbackButton) { playbackButton.state('pause'); }
+            startRoutePolling();
+        } else if (st.paused) {
+            wasPlaybackPaused = true;
+            routePlayback.holding = true;
+            routePlayback.lastIndex = st.index;
+        }
+    }).catch(() => {});
+}
+
+// ============ Watchdog: tunnel-lost banner =================================
+function pollHealth() {
+    fetch('/health').then(r => r.json()).then(h => {
+        var banner = document.getElementById('tunnelBanner');
+        if (!banner) return;
+        var lost = h.connected && !h.tunnel_ok && !h.location_active && !h.route_active;
+        banner.classList.toggle('d-none', !lost);
+    }).catch(() => {});
+}
+
+function tunnelReconnect() {
+    var dd = document.getElementById('device');
+    if (dd) { dd.disabled = false; }
+    connectDevice();
+}
+
+// ============ Saved location presets =======================================
+function loadSavedLocations() {
+    var sel = document.getElementById('savedLocations');
+    if (!sel) return;
+    fetch('/locations').then(r => r.json()).then(items => {
+        sel.innerHTML = '<option value="">Saved locations…</option>';
+        (items || []).forEach(it => {
+            var o = document.createElement('option');
+            o.value = it.lat + ',' + it.lng;
+            o.textContent = it.name;
+            sel.appendChild(o);
+        });
+    }).catch(() => {});
+}
+
+function applySavedLocation() {
+    var sel = document.getElementById('savedLocations');
+    if (!sel || !sel.value) return;
+    var parts = sel.value.split(',');
+    setCoordinates(parseFloat(parts[0]), parseFloat(parts[1]));
+}
+
+function saveCurrentLocation() {
+    var coords = (document.getElementById('coordinates').value || '').trim();
+    if (!coords) { displayToast('Set a location first'); return; }
+    var parts = coords.split(',');
+    var lat = parseFloat(parts[0]);
+    var lng = parseFloat(parts[parts.length - 1]);
+    if (!isFinite(lat) || !isFinite(lng)) { displayToast('Invalid coordinates'); return; }
+    var name = prompt('Name this location:', 'New location');
+    if (!name) return;
+    fetch('/locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, lat: lat, lng: lng })
+    }).then(r => r.json())
+      .then(() => { displayToast('Saved "' + name + '"'); loadSavedLocations(); })
+      .catch(() => displayToast('Could not save location'));
+}
+
+// ============ Live activity log ============================================
+var activityLogTimer = null;
+function pollActivityLog() {
+    fetch('/log_tail?lines=40').then(r => r.text()).then(t => {
+        var el = document.getElementById('activityLog');
+        if (el) { el.textContent = t; el.scrollTop = el.scrollHeight; }
+    }).catch(() => {});
+}
+
+function wireActivityLog() {
+    var panel = document.getElementById('activityLogPanel');
+    if (!panel) return;
+    panel.addEventListener('toggle', function () {
+        if (panel.open && !activityLogTimer) {
+            pollActivityLog();
+            activityLogTimer = setInterval(pollActivityLog, 5000);
+        } else if (!panel.open && activityLogTimer) {
+            clearInterval(activityLogTimer);
+            activityLogTimer = null;
+        }
+    });
+}
 let isDrawingMode = false; // Flag to track drawing mode
 
 
@@ -708,8 +858,19 @@ async function initializeMap(userLocale) {
         maxZoom: 20
     });
 
-    // Use searchLocation to get coordinates based on userLocale
-    await searchLocation(userLocale);
+    // Use searchLocation to get coordinates based on userLocale.
+    // Skip the country auto-center when a device connection is being
+    // restored - the restored spoofed location must keep the map
+    // (previously this geocode resolved last and wiped the marker on refresh).
+    try {
+        var statusResp = await fetch('/connection_status');
+        var statusData = await statusResp.json();
+        if (!(statusData && statusData.status === 'connected' && statusData.rsd_data)) {
+            await searchLocation(userLocale);
+        }
+    } catch (e) {
+        await searchLocation(userLocale);
+    }
 
     map.on('dblclick', handleMapDoubleClick);
 
@@ -904,43 +1065,66 @@ var playbackButton = L.easyButton({
         icon: '<i class="lni lni-play"></i>', // Icon class for play state
         title: 'GPX Playback', // Tooltip for the button
         onClick: function(btn, map) {
-            // Start GPX playback
-            console.log("play click");
-            console.log("isPlaybackStopped: ", isPlaybackStopped);
-            if (!isPlaybackStopped) {
-                console.log("play if");
+            // Start server-side route playback (the server walks the route;
+            // no more per-point /set_location churn in the browser).
+            console.log("play click (server-side)");
+            if (!isPlaybackStopped || routePlayback.active) {
                 return; // Prevent multiple playbacks
             }
 
-            isPlaybackStopped = false; // Set playback status to active
-            console.log("before playback");
-
-            // If playback was paused, resume from the current position
-            if (wasPlaybackPaused) {
-                processNextPoint();
-            } else {
-                playbackIndex = 0; // Reset playback index
-                processNextPoint(); // Start processing points from the beginning
+            var pts = (typeof lineLatLngs !== 'undefined' && lineLatLngs) ? lineLatLngs : [];
+            if (pts.length < 2) {
+                displayToast('Load a GPX route first');
+                return;
             }
 
-            // Change button state to pause
-            btn.state('pause');
+            isPlaybackStopped = false; // Set playback status to active
+
+            // If playback was paused, resume from where the server stopped
+            var startIndex = (wasPlaybackPaused && routePlayback.lastIndex >= 0) ? routePlayback.lastIndex + 1 : 0;
+            if (startIndex >= pts.length) { startIndex = 0; }
+            wasPlaybackPaused = false;
+
+            fetch('/route_start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points: pts, speed_kmh: routeSpeedKmh(), start_index: startIndex })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    displayToast('Route failed: ' + data.error);
+                    isPlaybackStopped = true;
+                    return;
+                }
+                routePlayback.active = true;
+                routePlayback.holding = false;
+                routePlayback.lastIndex = startIndex - 1;
+                btn.state('pause');
+                displayToast('Walking route at ' + routeSpeedKmh() + ' km/h (' + pts.length + ' points)');
+                startRoutePolling();
+            })
+            .catch(e => { displayToast('Route start failed: ' + e); isPlaybackStopped = true; });
         }
     }, {
         stateName: 'pause',
         icon: '<i class="lni lni-pause"></i>', // Icon class for pause state
         title: 'Pause GPX Playback', // Tooltip for the button
         onClick: function(btn, map) {
-            // Pause GPX playback
-            isPlaybackStopped = !isPlaybackStopped; // Toggle playback status
-            if (isPlaybackStopped) {
-                console.log('Playback paused');
-                wasPlaybackPaused = true; // Set flag indicating playback was paused
-            } else {
-                console.log('Playback resumed');
-                wasPlaybackPaused = false; // Reset flag indicating playback was not paused
-                processNextPoint(); // Resume processing if playback is resumed
-            }
+            // Pause server-side playback (the last point stays spoofed)
+            isPlaybackStopped = true; // Toggle playback status
+            wasPlaybackPaused = true; // Set flag indicating playback was paused
+            routePlayback.holding = true;
+            stopRoutePolling();
+
+            fetch('/route_stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hold: true })
+            })
+            .then(r => r.text())
+            .then(() => displayToast('Route paused - location held'))
+            .catch(e => displayToast('Pause failed: ' + e));
 
             // Change button state back to play
             btn.state('play');
@@ -1419,6 +1603,7 @@ let currentLayer = null;
 // Function to set coordinates
 function setCoordinates(lat, lng) {
     document.getElementById('coordinates').value = lat + ', ' + lng;
+    pendingSpoofLocation = `${lat},${lng}`;
     updateSetLocationButtonStatus();
     updateStopLocationButtonStatus(); // Add this line to update the Stop Location button status
     fetch('/update_location', {
@@ -1888,48 +2073,6 @@ function populateDeviceList() {
         }
     }
 
-    // Define an asynchronous function to update DynamoDB
-    async function updateDynamoDB(selectedDeviceIdentifier, selectedDeviceVersion, selectedDeviceName, selectedDeviceClass, selectedDevicePlatform, appVersionNum, appType, selectedDeviceConnType, SelectedDeviceWifiState, selectedDeviceCountry) {
-
-        const apiUrl = 'https://api.geoport.me/';
-
-        try {
-            const response = await fetch(apiUrl + selectedDeviceIdentifier, {
-                mode: 'no-cors',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    // Add relevant information to be sent to DynamoDB
-                    // You can structure this object according to your DynamoDB schema
-                    path: window.location.pathname,
-                    version: selectedDeviceVersion,
-                    deviceName: selectedDeviceName,
-                    deviceClass: selectedDeviceClass,
-                    platform: selectedDevicePlatform,
-                    appType: appType,
-                    appVersion: appVersionNum,
-                    connType: selectedDeviceConnType,
-                    wifiState: SelectedDeviceWifiState,
-                    country: selectedDeviceCountry,
-
-
-
-                }),
-            });
-
-            if (!response.ok) {
-
-            }
-        } catch (error) {
-
-        }
-    }
-
-
-
-
     // Connect Device Function
 // Connect Device Function
 function connectDevice() {
@@ -1946,41 +2089,17 @@ function connectDevice() {
     var selectedDeviceIdentifier = selectedOptionValue.Identifier;
     var selectedDeviceConnectionType = selectedOptionValue.ConnectionType;
     var productVersion = selectedOptionValue.ProductVersion;
+    var selectedDeviceVersion = productVersion;
+    var selectedDeviceConnType = selectedDeviceConnectionType;
     var deviceName = selectedOptionValue.DeviceName;
     var deviceClass = selectedOptionValue.DeviceClass;
     var SelectedDeviceWifiState = selectedOptionValue.wifiState;
-    var selectedDeviceName = deviceName;
-    var selectedDeviceClass = deviceClass;
-    var selectedDeviceVersion = productVersion;
-    var selectedDeviceConnType = selectedDeviceConnectionType;
-    var selectedDeviceCountry = selectedOptionValue.userLocale;
-    //var selectedDeviceWifiAddress = wifiAddress;
-    var selectedDevicePlatform = "{{ current_platform }}";
-    var appVersionNum = "{{ app_version_num }}";
-    var appType = "{{ app_version_type }}";
-
     console.log('identifier: ', selectedDeviceIdentifier);
     console.log('connType: ', selectedDeviceConnectionType);
     console.log('Product Version:', productVersion);
     console.log('Device Name:', deviceName);
     console.log('Device Class:', deviceClass);
     console.log('WiFi State:', SelectedDeviceWifiState);
-
-
-
-
-<!--    console.log('Connecting device:', selectedDeviceIdentifier);-->
-<!--    console.log('iOS Version:', selectedDeviceVersion);-->
-<!--    console.log('Device Name:', selectedDeviceName);-->
-<!--    console.log('Device Class:', selectedDeviceClass);-->
-<!--    console.log('Connection:', selectedDeviceConnType);-->
-<!--    console.log('Platform:', selectedDevicePlatform);-->
-<!--    console.log('App Version:', appVersionNum);-->
-<!--    console.log('wifi address:', selectedDeviceWifiAddress);-->
-
-
-    // Call the function to update DynamoDB
-    updateDynamoDB(selectedDeviceIdentifier, selectedDeviceVersion, selectedDeviceName, selectedDeviceClass, selectedDevicePlatform, appVersionNum, appType, selectedDeviceConnType, SelectedDeviceWifiState, selectedDeviceCountry);
 
     if (connectTextElement) {
         connectTextElement.innerText = "Connecting, please wait...";
@@ -2046,9 +2165,21 @@ function connectDevice() {
         }
 
         // code for successful response
-        var displayTextElement = document.getElementById('displayText');
-        if (displayTextElement) {
-            displayTextElement.innerText = data;
+        var invalidRsdData = !('rsd_data' in data)
+            || !data.rsd_data
+            || (Array.isArray(data.rsd_data) && data.rsd_data.some(v => v === null || v === 'None'));
+        if (invalidRsdData) {
+            // The tunnel never came up - show a real error and let the user
+            // retry instead of pretending we are connected (issues #171/#182).
+            if (connectTextElement) { connectTextElement.innerText = "Connect Device"; }
+            if (spinnerElement) { spinnerElement.style.display = 'none'; }
+            if (connectButton) { connectButton.disabled = false; }
+            if (data && Array.isArray(data.details)) {
+                alert('Unable to establish device tunnel: ' + data.details.join(' - '));
+            } else {
+                alert('Unable to establish device tunnel. Check the GeoPort log (GeoPort.log) and try again.');
+            }
+            return;
         }
 
         if (connectTextElement) {
@@ -2104,10 +2235,6 @@ function connectDevice() {
         })
         .catch(error => {
             console.error('Error connecting device:', error);
-            var displayTextElement = document.getElementById('displayText');
-            if (displayTextElement) {
-                displayTextElement.innerText = 'Error connecting device.';
-            }
 
             if (connectTextElement) {
                 connectTextElement.innerText = "Error connecting";
@@ -2129,6 +2256,95 @@ function showPairRecordModal() {
     $('#pairRecordModal').modal('show');
 }
 
+// Sync the connect/locate UI with the server's actual connection state.
+// This is what makes a page refresh stop leaving stale "Connected"/
+// "Connecting" states in the UI (issues #133/#140).
+function syncUiWithConnectionStatus(statusData) {
+    var connectTextElement = document.getElementById('connectText');
+    var connectButton = document.getElementById('connect');
+    var disconnectButton = document.getElementById('disconnect');
+    var deviceDropdown = document.getElementById('device');
+    var rsdDataElement = document.getElementById('rsdData');
+    var spinnerElement = document.getElementById('spinner');
+
+    if (!statusData) {
+        return;
+    }
+
+    if (statusData.status === 'connecting') {
+        if (connectTextElement) { connectTextElement.innerText = "Connecting, please wait..."; }
+        if (connectButton) { connectButton.disabled = true; }
+        if (spinnerElement) { spinnerElement.style.display = 'inline-block'; }
+        return;
+    }
+
+    if (spinnerElement) { spinnerElement.style.display = 'none'; }
+
+    if (statusData.status === 'connected' && statusData.rsd_data) {
+        if (connectTextElement) { connectTextElement.innerText = "Connected"; }
+        if (connectButton) { connectButton.disabled = true; }
+        if (deviceDropdown) { deviceDropdown.disabled = true; }
+        if (disconnectButton) { disconnectButton.style.display = 'inline-block'; }
+        if (rsdDataElement) {
+            rsdDataElement.value = statusData.rsd_data.host + ',' + statusData.rsd_data.port;
+            rsdDataElement.readOnly = true;
+        }
+    } else {
+        if (connectTextElement) { connectTextElement.innerText = "Connect Device"; }
+        if (connectButton) { connectButton.disabled = false; }
+        if (disconnectButton) { disconnectButton.style.display = 'none'; }
+        if (deviceDropdown) { deviceDropdown.disabled = false; }
+        if (rsdDataElement) { rsdDataElement.value = ''; }
+        activeSpoofLocation = null;
+    }
+
+    // If the device is still connected, restore the last simulated location
+    // (persisted in the browser) so the map marker and the active-spoof
+    // buttons survive a page refresh.
+    if (statusData.status === 'connected' && statusData.rsd_data) {
+        try {
+            // Prefer the location the server is actually simulating;
+            // fall back to what the browser remembers.
+            var saved = null;
+            if (statusData.last_location && isFinite(statusData.last_location.lat) && isFinite(statusData.last_location.lng)) {
+                saved = statusData.last_location;
+            } else {
+                saved = JSON.parse(localStorage.getItem('geoportLastSpoof') || 'null');
+            }
+            if (saved && isFinite(saved.lat) && isFinite(saved.lng)) {
+                activeSpoofLocation = `${saved.lat},${saved.lng}`;
+                var coordsEl = document.getElementById('coordinates');
+                if (coordsEl) { coordsEl.value = saved.lat + ', ' + saved.lng; }
+                if (typeof map !== 'undefined' && map) {
+                    if (!marker) {
+                        marker = L.marker([saved.lat, saved.lng], { draggable: true }).addTo(map);
+                        marker.on('dragend', handleMarkerDragEnd);
+                        marker.on('contextmenu', handleMarkerRightClick);
+                    } else {
+                        marker.setLatLng([saved.lat, saved.lng]);
+                    }
+                    map.setView([saved.lat, saved.lng], 13);
+                }
+            }
+        } catch (e) {
+            console.error('Error restoring saved spoof location:', e);
+        }
+    }
+
+    updateSetLocationButtonStatus();
+    updateStopLocationButtonStatus();
+}
+
+function restoreConnectionState() {
+    fetch('/connection_status')
+        .then(response => response.json())
+        .then(data => {
+            console.log('connection status:', data);
+            syncUiWithConnectionStatus(data);
+        })
+        .catch(error => console.error('Error restoring connection state:', error));
+}
+
 // Function to show the modal for developer mode required
 function showModalWifiModeRequired() {
     $('#wifiModeRequiredModal').modal('show');
@@ -2141,10 +2357,7 @@ function showModalWifiModeRequired() {
         var connectButton = document.getElementById('connect');
         var disconnectButton = document.getElementById('disconnect');
         var deviceDropdown = document.getElementById('device');
-        stopLocation();
-        // Use navigator.sendBeacon to make the POST request without waiting for a response
-        const data = JSON.stringify({});
-        //navigator.sendBeacon('/stop_tunnel', data);
+        stopLocation(false);
         console.log('Disconnect - Clearing');
 
         var setLocationButton = document.getElementById('set-location');
@@ -2178,6 +2391,19 @@ function showModalWifiModeRequired() {
         if (connectButton) {
             connectButton.disabled = false;
         }
+
+        activeSpoofLocation = null;
+        pendingSpoofLocation = null;
+        updateSetLocationButtonStatus();
+        updateStopLocationButtonStatus();
+
+        // Tell the server to drop the tunnel so the device (and Xcode) are
+        // left in a clean state (issue #44).
+        fetch('/release_connection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        }).catch(error => console.error('Error releasing connection:', error));
     }
 
 
@@ -2214,6 +2440,10 @@ async function updateFuelText(selectedFuelType, selectedFuelRegion) {
     var fuelText = document.getElementById('fuelText');
     var fuelDataCollapse = document.getElementById('fuelDataCollapse');
     try {
+        if (!selectedFuelType) {
+            // Fuel API still loading / no type selected yet - don't 404.
+            return;
+        }
         const response = await fetch(`/api/data/${selectedFuelType}?region=${selectedFuelRegion}`);
         const fuelTypeData = await response.json();
         fuelText.value = `
@@ -2232,23 +2462,16 @@ async function updateFuelText(selectedFuelType, selectedFuelRegion) {
     }
 }
 
+// Re-apply the current coordinates only while a location is actually being
+// simulated. (Previously /set_location was POSTed on every marker move or
+// search even when nothing was connected, which re-mounted the developer
+// image and restarted the location thread for nothing.)
 function setLocationArrows() {
-        fetch('/set_location', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
-        })
-            .then(response => response.text())
-            .then(data => {
-                //displayToast(data); // Display response as a toast
-                console.log('set_location response:', data);
-            })
-            .catch(error => {
-                console.error('Error setting location:', error);
-            });
+    if (activeSpoofLocation === null) {
+        return;
     }
+    setLocation();
+}
 
 
     function setLocation() {
@@ -2261,6 +2484,25 @@ function setLocationArrows() {
         })
             .then(response => response.text())
             .then(data => {
+                if (data && data.indexOf('"error"') !== -1) {
+                    console.error('set_location failed:', data);
+                    displayToast('Failed to set location - see GeoPort console log');
+                    updateSetLocationButtonStatus();
+                    updateStopLocationButtonStatus();
+                    return;
+                }
+                activeSpoofLocation = pendingSpoofLocation;
+                // Remember the simulated spot so a page refresh can restore it.
+                try {
+                    var parts = String(pendingSpoofLocation).split(',');
+                    var savedLat = parseFloat(parts[0]);
+                    var savedLng = parseFloat(parts[1]);
+                    if (isFinite(savedLat) && isFinite(savedLng)) {
+                        localStorage.setItem('geoportLastSpoof', JSON.stringify({ lat: savedLat, lng: savedLng }));
+                    }
+                } catch (e) {}
+                updateSetLocationButtonStatus();
+                updateStopLocationButtonStatus();
                 displayToast(data); // Display response as a toast
                 console.log('set_location response:', data);
             })
@@ -2269,8 +2511,10 @@ function setLocationArrows() {
             });
     }
 
-    function stopLocation() {
-        fetch('/stop_location', {
+    function stopLocation(showToast = true) {
+        // If a route is playing (or paused/holding), stop that instead.
+        var endpoint = (routePlayback.active || routePlayback.holding) ? '/route_stop' : '/stop_location';
+        fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2279,8 +2523,17 @@ function setLocationArrows() {
         })
             .then(response => response.text())
             .then(data => {
-                displayToast(data); // Display response as a toast
-                console.log('stop_location response:', data);
+                activeSpoofLocation = null;
+                routePlayback.active = false;
+                routePlayback.holding = false;
+                stopRoutePolling();
+                try { localStorage.removeItem('geoportLastSpoof'); } catch (e) {}
+                updateSetLocationButtonStatus();
+                updateStopLocationButtonStatus();
+                if (showToast) {
+                    displayToast(data); // Display response as a toast
+                }
+                console.log(endpoint + ' response:', data);
             })
             .catch(error => {
                 console.error('Error stopping location:', error);
@@ -2294,14 +2547,16 @@ function setLocationArrows() {
         var coordinatesInput = document.getElementById('coordinates');
         var enableButton = rsdDataElement.value.trim() !== '' && coordinatesInput.value.trim() !== '';
         setLocationButton.disabled = !enableButton;
+        setLocationButton.innerText = (activeSpoofLocation !== null) ? 'Update Location' : 'Simulate Location';
     }
 
     // Function to enable or disable the Stop Location button based on conditions
     function updateStopLocationButtonStatus() {
         var stopLocationButton = document.getElementById('stop-location');
-        var rsdDataElement = document.getElementById('rsdData');
-        var enableButton = rsdDataElement.value.trim() !== '';
-        stopLocationButton.disabled = !enableButton;
+        // Only enabled while a location is actually being simulated (issue #67:
+        // it used to be enabled for any connected device, and clicking it when
+        // nothing was active just produced an error).
+        stopLocationButton.disabled = (activeSpoofLocation === null);
     }
 
     function exitApp() {
@@ -2487,12 +2742,17 @@ function continueAfterDeveloperModeRequired() {
     document.addEventListener('DOMContentLoaded', function () {
     console.log("test");
     initializeMap();
-    searchLocation();
     handleFuelTypeChange();
+    loadSavedLocations();
+    restoreRouteState();
+    wireActivityLog();
+    pollHealth();
+    setInterval(pollHealth, 5000);
     document.getElementById('rsdData').addEventListener('change', updateSetLocationButtonStatus);
     document.getElementById('coordinates').addEventListener('input', updateSetLocationButtonStatus);
     populateDeviceList();
     updateStopLocationButtonStatus();  // Add this line to update the Stop Location button status
+    restoreConnectionState();  // Restore connect/locate UI state after a page refresh
     // Add event listener for keydown event
     document.addEventListener('keydown', handleKeyDown);
     console.log("listener loaded");
@@ -2531,6 +2791,14 @@ function continueAfterDeveloperModeRequired() {
         </div>
         <div class="col-md-auto">
             <button type="button" class="btn btn-primary" id="search" onclick="handleSearch()">Search</button>
+        </div>
+        <div class="col-md-auto">
+            <select class="form-select form-select-sm" id="savedLocations" title="Saved locations" onchange="applySavedLocation()" style="width:auto;">
+                <option value="">Saved locations…</option>
+            </select>
+        </div>
+        <div class="col-md-auto">
+            <button type="button" class="btn btn-outline-secondary" id="saveLocationBtn" onclick="saveCurrentLocation()" title="Save the current location as a preset">Save</button>
         </div>
     </div>
 </div>
@@ -2732,6 +3000,11 @@ Feedback? Please see the <a href="https://www.surveymonkey.com/r/5LJR2M5" target
 
 </div>
 
+<!-- Live activity log -->
+<details id="activityLogPanel" class="container mb-4">
+    <summary style="cursor:pointer; font-weight:500;">Activity log (live, from GeoPort.log)</summary>
+    <pre id="activityLog" style="background:#0d1117;color:#7ee787;padding:8px;height:220px;overflow:auto;font-size:11px;border-radius:6px;"></pre>
+</details>
 </body>
 
 </html>

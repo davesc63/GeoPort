@@ -1,0 +1,14 @@
+# GeoPort source dependencies (see issue #167)
+#
+# Keep these pinned - unpinned installs pull pymobiledevice3 releases that
+# have removed APIs this app imports. pymobiledevice3==4.23.0 has been
+# verified against every import in src/main.py.
+pymobiledevice3==4.23.0
+flask==3.0.3
+requests==2.32.3
+pycountry==24.6.1
+psutil==6.1.0
+urllib3==2.2.3
+pyuac==0.0.3; sys_platform == 'win32'
+pywin32==312; sys_platform == 'win32'
+pystray==0.19.5  # system tray icon (optional at runtime - app works without it)
