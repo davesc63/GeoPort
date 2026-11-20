@@ -2240,13 +2240,22 @@ function setLocationArrows() {
             },
             body: JSON.stringify({}),
         })
-            .then(response => response.text())
+            .then(async response => {
+                const body = await response.text();
+                if (!response.ok) {
+                    let message = body;
+                    try { message = JSON.parse(body).error || body; } catch (_) {}
+                    throw new Error(message);
+                }
+                return body;
+            })
             .then(data => {
                 //displayToast(data); // Display response as a toast
                 console.log('set_location response:', data);
             })
             .catch(error => {
                 console.error('Error setting location:', error);
+                displayToast(`Location failed: ${error.message}`);
             });
     }
 
@@ -2259,13 +2268,22 @@ function setLocationArrows() {
             },
             body: JSON.stringify({}),
         })
-            .then(response => response.text())
+            .then(async response => {
+                const body = await response.text();
+                if (!response.ok) {
+                    let message = body;
+                    try { message = JSON.parse(body).error || body; } catch (_) {}
+                    throw new Error(message);
+                }
+                return body;
+            })
             .then(data => {
                 displayToast(data); // Display response as a toast
                 console.log('set_location response:', data);
             })
             .catch(error => {
                 console.error('Error setting location:', error);
+                displayToast(`Location failed: ${error.message}`);
             });
     }
 
@@ -2277,13 +2295,22 @@ function setLocationArrows() {
             },
             body: JSON.stringify({}),
         })
-            .then(response => response.text())
+            .then(async response => {
+                const body = await response.text();
+                if (!response.ok) {
+                    let message = body;
+                    try { message = JSON.parse(body).error || body; } catch (_) {}
+                    throw new Error(message);
+                }
+                return body;
+            })
             .then(data => {
                 displayToast(data); // Display response as a toast
                 console.log('stop_location response:', data);
             })
             .catch(error => {
                 console.error('Error stopping location:', error);
+                displayToast(`Stop location failed: ${error.message}`);
             });
     }
 
@@ -2374,9 +2401,10 @@ function setLocationArrows() {
           </button>
         </div>
         <div class="toast-body">
-          ${message}
         </div>
       `;
+
+      toast.querySelector('.toast-body').textContent = message;
 
       // Append the toast to the toast container
       document.querySelector('.toast-container').appendChild(toast);

@@ -1,9 +1,15 @@
 import locale
 import os
+import queue
 import re
 import sys
 import time
-import pyuac
+try:
+    import pyuac
+except ImportError:
+    if sys.platform == 'win32':
+        raise
+    pyuac = None
 import psutil
 import signal
 import socket
@@ -15,6 +21,7 @@ import threading
 import webbrowser
 import subprocess
 import pycountry
+from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
 from urllib3.exceptions import InsecureRequestWarning, ConnectionError
@@ -36,12 +43,15 @@ from pymobiledevice3.osu.os_utils import get_os_utils
 from pymobiledevice3.bonjour import DEFAULT_BONJOUR_TIMEOUT, browse_mobdev2
 from pymobiledevice3.pair_records import get_local_pairing_record, get_remote_pairing_record_filename, get_preferred_pair_record
 from pymobiledevice3.common import get_home_folder
-from pymobiledevice3.cli.remote import cli_install_wetest_drivers
+try:
+    from pymobiledevice3.cli.remote import cli_install_wetest_drivers
+except ImportError:
+    cli_install_wetest_drivers = None
 
-from pymobiledevice3.cli.remote import tunnel_task
 from pymobiledevice3.lockdown import LockdownClient
 from pymobiledevice3.lockdown_service_provider import LockdownServiceProvider
 from pymobiledevice3.remote.common import TunnelProtocol
+from modern_location_client import ModernLocationController
 
 #========= Arg Parser ========
 # Parse command-line arguments
@@ -108,9 +118,15 @@ BROADCAST_FILE = 'BROADCAST'
 APP_VERSION_NUMBER = "2.3.3"
 APP_VERSION_TYPE = "fuel"
 terminate_tunnel_thread = False
-terminate_location_thread = False
-location_threads = []
+location_stop_event = None
 timeout = DEFAULT_BONJOUR_TIMEOUT
+bundled_bridge = (Path(sys.executable).resolve().parents[1] / 'Resources' /
+                  'modern-location-bridge') if getattr(sys, 'frozen', False) else None
+modern_location = ModernLocationController(
+    python_executable=os.environ.get('GEOPORT_MODERN_PMD3_PYTHON'),
+    bridge_executable=os.environ.get('GEOPORT_MODERN_BRIDGE_EXECUTABLE') or
+    (str(bundled_bridge) if bundled_bridge and bundled_bridge.is_file() else None),
+)
 
 # Get the current platform using sys.platform
 current_platform = sys.platform
@@ -123,7 +139,7 @@ platform = {
 }.get(current_platform, 'Unknown')
 
 # Check if running as sudo
-if current_platform == "darwin":
+if current_platform == "darwin" and not modern_location.enabled:
     if os.geteuid() != 0:
         logger.error("*********************** WARNING ***********************")
         logger.error("Not running as Sudo, this probably isn't going to work")
@@ -393,6 +409,8 @@ def get_devices_with_retry(max_attempts=10):
         logger.info(f"iOS Version: {ios_version}")
         if version_check(ios_version):
             logger.info("Windows Driver Install Required")
+            if cli_install_wetest_drivers is None:
+                raise RuntimeError("Bundled pymobiledevice3 does not support driver installation")
             cli_install_wetest_drivers()
     for attempt in range(1, max_attempts + 1):
         try:
@@ -615,7 +633,7 @@ def connect_device():
 
     # Extract the udid from the request
     udid = data.get('udid', None)
-    #ios_version = data.get('ios_version')
+    ios_version = data.get('ios_version')
 
     connection_type = data.get('connType')
 
@@ -632,6 +650,8 @@ def connect_device():
             logger.info(f"RSD in udid mapping is: {rsd_data}")
             logger.info("RSD already created. Reusing connection")
             logger.info(f"RSD Data: {rsd_data}")
+            if modern_location.enabled and ios_version and ios_version.startswith('27.'):
+                return jsonify({'rsd_data': [rsd_host, rsd_port]})
             return jsonify({'rsd_data': rsd_data})
 
         # If no matching entry found for the udid and desired connection type
@@ -643,6 +663,16 @@ def connect_device():
     if not check_developer_mode(udid, connection_type):
         # Display modal to inform the user and give options
         return jsonify({'developer_mode_required': 'True'})
+
+    if modern_location.enabled and str(data.get('ios_version', '')).startswith('27.'):
+        if connection_type != 'USB':
+            return jsonify({'error': 'iOS 27 bridge requires USB'}), 400
+        ios_version = data['ios_version']
+        rsd_host, rsd_port = 'modern-dvt', 'auto'
+        rsd_data = [rsd_host, rsd_port]
+        rsd_data_map.setdefault(udid, {})[connection_type] = {
+            'host': rsd_host, 'port': rsd_port}
+        return jsonify({'rsd_data': rsd_data})
 
     if connection_type == "USB":
         return connect_usb(data)
@@ -965,9 +995,7 @@ def mount_developer_image():
         error_message = str(e)
         return jsonify({'error': error_message})
 
-async def set_location_thread(latitude, longitude):
-    global terminate_location_thread
-
+async def set_location_thread(latitude, longitude, report_success, stop_event):
     try:
         global rsd_host, rsd_port, udid, ios_version, connection_type
 
@@ -983,71 +1011,86 @@ async def set_location_thread(latitude, longitude):
 
 
                 if ios_version is not None and is_major_version_17_or_greater(ios_version):
+                    if not rsd_host or not rsd_port:
+                        raise RuntimeError("RSD tunnel is not ready")
                     async with RemoteServiceDiscoveryService((rsd_host, rsd_port)) as sp_rsd:
                         with DvtSecureSocketProxyService(sp_rsd) as dvt:
                             LocationSimulation(dvt).set(latitude, longitude)
-                            logger.warning("Location Set Successfully")
+                            report_success()
+                            logger.warning("LocationSimulation accepted the set call")
                             #OSUTILS.wait_return()
-                            while not terminate_location_thread:
-                                time.sleep(0.5)
+                            while not stop_event.is_set():
+                                await asyncio.sleep(0.5)
 
 
                 elif ios_version is not None and not is_major_version_17_or_greater(ios_version):
                     with DvtSecureSocketProxyService(lockdown=lockdown) as dvt:
                         LocationSimulation(dvt).clear()
                         LocationSimulation(dvt).set(latitude, longitude)
-                        logger.warning("Location Set Successfully")
+                        report_success()
+                        logger.warning("LocationSimulation accepted the set call")
                         #await asyncio.wait_for(OSUTILS.wait_return(), timeout=1)  # Adjust timeout as needed
-                        while not terminate_location_thread:
-                            time.sleep(0.5)
+                        while not stop_event.is_set():
+                            await asyncio.sleep(0.5)
+                else:
+                    raise RuntimeError("Device iOS version is unavailable")
 
                 await asyncio.sleep(1)  # Adjust sleep time according to your requirements
+            else:
+                raise RuntimeError("Selected connection has no RSD session")
+        else:
+            raise RuntimeError("Selected device has no RSD session")
 
     except asyncio.CancelledError:
-        # Handle cancellation gracefully
-        pass
+        raise
     except ConnectionResetError as cre:
         if "[Errno 54] Connection reset by peer" in str(cre):
             logger.error("The Set Location buffer is full. Try to 'Stop Location' to clear old connections")
+        raise
     except Exception as e:
-        logger.error(f"Error setting location: {e}")
+        logger.exception("Error setting location")
+        raise
 
 
 # Function to start the set_location_thread in a separate thread
 def start_set_location_thread(latitude, longitude):
-    global terminate_location_thread
+    global location_stop_event
     # Stop existing threads
     stop_set_location_thread()
+    stop_event = threading.Event()
+    location_stop_event = stop_event
+    result = queue.Queue(maxsize=1)
 
-    # Reset the terminate flag before starting the thread
-    terminate_location_thread = False
-
-
-
-    # Define a helper function to run the async function in the thread
+    # The HTTP request waits until the actual DVT call completes or fails.
     async def run_async_function():
-        await set_location_thread(latitude, longitude)
-
-    # Define a function to periodically check if the thread should terminate
-    def check_termination():
-        while not terminate_location_thread:
-            asyncio.run(asyncio.sleep(1))  # Adjust sleep time as needed
-        logger.info("Location Thread Terminated")
+        await set_location_thread(latitude, longitude, lambda: result.put_nowait(None), stop_event)
 
     # Create a new thread and start it
-    location_thread = threading.Thread(target=lambda: asyncio.run(run_async_function()))
+    def run_location_worker():
+        try:
+            asyncio.run(run_async_function())
+        except Exception as exc:
+            if result.empty():
+                result.put_nowait(exc)
+
+    location_thread = threading.Thread(target=run_location_worker, daemon=True)
     location_thread.start()
 
-    # Create a new thread for checking termination
-    termination_thread = threading.Thread(target=check_termination)
-    termination_thread.start()
+    try:
+        failure = result.get(timeout=30)
+    except queue.Empty as exc:
+        stop_event.set()
+        raise TimeoutError("LocationSimulation did not respond within 30 seconds") from exc
+    if failure is not None:
+        raise failure
 
 
 # Function to stop the location thread
 def stop_set_location_thread():
-    # Set the flag to indicate that the thread should stop
-    global terminate_location_thread
-    terminate_location_thread = True
+    global location_stop_event
+    if location_stop_event is not None:
+        location_stop_event.set()
+        location_stop_event = None
 
 
 
@@ -1062,43 +1105,58 @@ def set_location():
 
         if ios_version is not None and is_major_version_17_or_greater(ios_version):
             # Split the location string into latitude and longitude
-            latitude, longitude = location.split()
+            latitude, longitude = map(float, location.split())
+
+            if modern_location.enabled and ios_version.startswith('27.'):
+                modern_location.set(udid, latitude, longitude)
+                return 'DVT set call completed; check the phone location'
 
             #asyncio.run(set_location_thread(latitude, longitude))
             start_set_location_thread(latitude, longitude)
 
-            return 'Location set successfully'
+            return 'DVT set call completed; check the phone location'
 
         elif ios_version is not None and not is_major_version_17_or_greater(ios_version):
             global lockdown
             # Split the location string into latitude and longitude
-            latitude, longitude = location.split()
+            latitude, longitude = map(float, location.split())
 
             mount_developer_image()
             #asyncio.run(set_location_thread(latitude, longitude))
             start_set_location_thread(latitude, longitude)
 
 
-            return 'Location set successfully'
+            return 'DVT set call completed; check the phone location'
 
         else:
             # Invalid ios_version
-            return jsonify({'error': 'No iOS version present'})
+            return jsonify({'error': 'No iOS version present'}), 400
 
     except Exception as e:
         error_message = str(e)
-        return jsonify({'error': error_message})
+        return jsonify({'error': error_message}), 500
 
 
 @app.route('/stop_location', methods=['POST'])
-async def stop_location():
+def stop_location():
+    global ios_version, udid, connection_type
     try:
         stop_set_location_thread()
+        if modern_location.enabled and ios_version and ios_version.startswith('27.'):
+            modern_location.clear(udid)
+            return 'Location cleared successfully'
+        return asyncio.run(stop_legacy_location())
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+async def stop_legacy_location():
+    global ios_version, udid, connection_type
+    try:
         global rsd_data
         global rsd_host
         global rsd_port
         global lockdown
-        global ios_version, udid, connection_type
         logger.info(f"stop set location data:  {rsd_data}")
 
 
@@ -1125,7 +1183,7 @@ async def stop_location():
         return 'Location cleared successfully'
     except Exception as e:
         error_message = str(e)
-        return jsonify({'error': error_message})
+        return jsonify({'error': error_message}), 500
 
 
 def get_github_version():
@@ -1273,7 +1331,7 @@ def py_list_devices():
         logger.info(f"\n\nConnected Devices: {connected_devices}\n")
 
         # Check if running as sudo
-        if current_platform == "darwin":
+        if current_platform == "darwin" and not modern_location.enabled:
             if os.geteuid() != 0:
                 logger.error("*********************** WARNING ***********************")
                 logger.error("Not running as Sudo, this probably isn't going to work")
@@ -1318,7 +1376,7 @@ def clear_old_geoport():
 
 def shutdown_server():
     logger.warning("shutdown server")
-    asyncio.run(stop_location())
+    stop_location()
     stop_set_location_thread()
     stop_tunnel_thread()
     cancel_async_tasks()
@@ -1478,7 +1536,3 @@ if __name__ == '__main__':
     #threading.Thread(target=open_browser).start()
 
     app.run(debug=True, use_reloader=False, port=chosen_port, host='0.0.0.0')
-
-
-
-
