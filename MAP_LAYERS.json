@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-11-20",
+  "defaults": {
+    "modern_dark": "esri_dark_gray",
+    "modern_dark_localhost": "stadia_alidade_dark",
+    "modern_light": "esri_world_topo",
+    "modern_light_localhost": "stadia_osm_bright",
+    "classic": "esri_world_street",
+    "classic_localhost": "stadia_osm_bright"
+  },
+  "layers": [
+    {
+      "id": "esri_dark_gray",
+      "name": "Esri Dark Canvas (with Labels)",
+      "category": "Dark",
+      "maxZoom": 16,
+      "attribution": "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, OpenStreetMap",
+      "sublayers": [
+        { "url": "/api/tiles/esri_dark_base/{z}/{x}/{y}", "maxZoom": 16 },
+        { "url": "/api/tiles/esri_dark_ref/{z}/{x}/{y}", "maxZoom": 16 }
+      ]
+    },
+    {
+      "id": "osm_midnight",
+      "name": "OSM Midnight (Detailed Dark)",
+      "category": "Dark",
+      "url": "/api/tiles/osm/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "className": "geoport-dark-tiles",
+      "attribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a> contributors"
+    },
+    {
+      "id": "esri_world_street",
+      "name": "Esri World Street Map",
+      "category": "Streets",
+      "url": "/api/tiles/esri_street/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "attribution": "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap"
+    },
+    {
+      "id": "esri_world_topo",
+      "name": "Esri World Topo Map",
+      "category": "Streets & Terrain",
+      "url": "/api/tiles/esri_topo/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "attribution": "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, USGS"
+    },
+    {
+      "id": "esri_light_smooth",
+      "name": "Esri Light Smooth Canvas",
+      "category": "Streets",
+      "maxZoom": 16,
+      "attribution": "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, OpenStreetMap",
+      "sublayers": [
+        { "url": "/api/tiles/esri_light_base/{z}/{x}/{y}", "maxZoom": 16 },
+        { "url": "/api/tiles/esri_light_ref/{z}/{x}/{y}", "maxZoom": 16 }
+      ]
+    },
+    {
+      "id": "osm",
+      "name": "OpenStreetMap",
+      "category": "Streets",
+      "url": "/api/tiles/osm/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "attribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a> contributors"
+    },
+    {
+      "id": "osm_hot",
+      "name": "OpenStreetMap HOT",
+      "category": "Streets",
+      "url": "/api/tiles/hot/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "attribution": "&copy; OpenStreetMap contributors &bull; Humanitarian OSM Team"
+    },
+    {
+      "id": "opnvkarte",
+      "name": "OPNVKarte (Transit & Airports)",
+      "category": "Specialty",
+      "url": "/api/tiles/opnvkarte/{z}/{x}/{y}",
+      "maxZoom": 18,
+      "attribution": "Map <a href=\"https://memomaps.de/\" target=\"_blank\">memomaps.de</a> CC-BY-SA &bull; &copy; OpenStreetMap"
+    },
+    {
+      "id": "cyclosm",
+      "name": "CyclOSM (Trails & Bikeways)",
+      "category": "Specialty",
+      "url": "/api/tiles/cyclosm/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "attribution": "&copy; OpenStreetMap contributors &bull; CyclOSM"
+    },
+    {
+      "id": "opentopomap",
+      "name": "OpenTopoMap (Contours)",
+      "category": "Streets & Terrain",
+      "url": "/api/tiles/topo/{z}/{x}/{y}",
+      "maxZoom": 17,
+      "attribution": "&copy; OpenStreetMap &bull; &copy; OpenTopoMap (CC-BY-SA)"
+    },
+    {
+      "id": "esri_natgeo",
+      "name": "Esri National Geographic",
+      "category": "Specialty",
+      "url": "/api/tiles/esri_natgeo/{z}/{x}/{y}",
+      "maxZoom": 16,
+      "attribution": "Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ"
+    },
+    {
+      "id": "esri_satellite_hybrid",
+      "name": "Esri Satellite Hybrid (with Roads)",
+      "category": "Satellite",
+      "maxZoom": 19,
+      "attribution": "Tiles &copy; Esri &mdash; Source: Esri, USDA, USGS, GeoEye, Getmapping",
+      "sublayers": [
+        { "url": "/api/tiles/satellite/{z}/{x}/{y}", "maxZoom": 19 },
+        { "url": "/api/tiles/esri_trans_ref/{z}/{x}/{y}", "maxZoom": 19 },
+        { "url": "/api/tiles/esri_places_ref/{z}/{x}/{y}", "maxZoom": 19 }
+      ]
+    },
+    {
+      "id": "esri_world_imagery",
+      "name": "Esri World Imagery (Clean Satellite)",
+      "category": "Satellite",
+      "url": "/api/tiles/satellite/{z}/{x}/{y}",
+      "maxZoom": 19,
+      "attribution": "Tiles &copy; Esri &mdash; World Imagery"
+    },
+    {
+      "id": "stadia_osm_bright",
+      "name": "Stadia Maps (OSM Bright)",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png",
+      "maxZoom": 20,
+      "stadia": true,
+      "attribution": "&copy; <a href=\"https://stadiamaps.com/\" target=\"_blank\">Stadia Maps</a> &copy; OpenMapTiles &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_alidade_smooth",
+      "name": "Stadia Alidade Smooth",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
+      "maxZoom": 20,
+      "stadia": true,
+      "attribution": "&copy; <a href=\"https://stadiamaps.com/\" target=\"_blank\">Stadia Maps</a> &copy; OpenMapTiles &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_alidade_dark",
+      "name": "Stadia Alidade Smooth Dark",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png",
+      "maxZoom": 20,
+      "stadia": true,
+      "attribution": "&copy; <a href=\"https://stadiamaps.com/\" target=\"_blank\">Stadia Maps</a> &copy; OpenMapTiles &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_outdoors",
+      "name": "Stadia Outdoors",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
+      "maxZoom": 20,
+      "stadia": true,
+      "attribution": "&copy; <a href=\"https://stadiamaps.com/\" target=\"_blank\">Stadia Maps</a> &copy; OpenMapTiles &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_stamen_terrain",
+      "name": "Stadia Stamen Terrain",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png",
+      "maxZoom": 18,
+      "stadia": true,
+      "attribution": "&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_stamen_toner",
+      "name": "Stadia Stamen Toner",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png",
+      "maxZoom": 20,
+      "stadia": true,
+      "attribution": "&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_stamen_watercolor",
+      "name": "Stadia Stamen Watercolor",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg",
+      "maxZoom": 16,
+      "stadia": true,
+      "attribution": "&copy; Stadia Maps &copy; Stamen Design &copy; OpenStreetMap"
+    },
+    {
+      "id": "stadia_alidade_satellite",
+      "name": "Stadia Alidade Satellite",
+      "category": "Stadia (Localhost / Key)",
+      "url": "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
+      "maxZoom": 20,
+      "stadia": true,
+      "attribution": "&copy; CNES, Airbus DS | &copy; Stadia Maps &copy; OpenStreetMap"
+    }
+  ]
+}
