@@ -30,6 +30,13 @@
 
 ---
 
+> ### 📱 NEW BREAKTHROUGH: GeoPort Untethered iOS App (`.ipa` Beta)
+> Run GeoPort **100% standalone directly on your iPhone** — no PC, Mac, or cable attached while spoofing! Sideloads in minutes with any **$0 Free Apple ID** via **SideStore + LocalDevVPN**.
+> - 👉 **[Step-by-Step Setup Guide & SideStore 1-Tap Install (`geoport.me/ios.html`)](https://geoport.me/ios.html)**
+> - 📦 **[Direct `.IPA` Downloads (`v5.0.4-ios` Pre-Release)](https://github.com/davesc63/GeoPort/releases/tag/v5.0.4-ios)**
+
+---
+
 **GeoPort** is a cross-platform iOS GPS location simulation studio for **Windows**, **macOS (Apple Silicon & Intel)**, and **Ubuntu Linux / Headless Servers**. Teleport anywhere on Earth, nudge your position in real time with arrow keys or the touch D-pad, replay GPX/GeoJSON tracks, or cruise along real street-routed journeys over **Wi-Fi** or **USB** — with **zero jailbreak** required.
 
 ---
