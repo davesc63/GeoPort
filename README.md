@@ -67,6 +67,52 @@ GeoPort v5 is a ground-up architectural upgrade built on the latest **`pymobiled
 
 ---
 
+## 🗺️ Map Overlays & Local Overrides (No Rebuild Required!)
+
+GeoPort v5.0.2+ includes **21 curated map overlays** out of the box across both the **Spatial HUD** (`🗺️` selector above the D-pad) and **Classic UI** (top-right layer switcher):
+
+- **13 Zero-API-Key Global Overlays** *(work everywhere — `localhost`, LAN IPs like `192.168.x.x`, and headless servers)*:
+  - **Dark**: *Esri Dark Canvas (with Street & Place Labels)*, *OSM Midnight (Detailed Dark)*
+  - **Streets & Terrain**: *Esri World Street Map*, *Esri World Topo Map*, *Esri Light Smooth Canvas*, *OpenStreetMap*, *OpenStreetMap HOT*, *OpenTopoMap (Contours)*
+  - **Satellite & Specialty**: *Esri Satellite Hybrid (Imagery + Roads & Labels)*, *Esri World Imagery*, *Esri National Geographic*, *OPNVKarte (Transit & Airports)*, *CyclOSM (Trails & Bikeways)*
+- **8 Classic Stadia Overlays** *(OSM Bright, Alidade Smooth, Alidade Smooth Dark, Outdoors, Stamen Terrain, Stamen Toner, Stamen Watercolor, Alidade Satellite)*:
+  - Automatically active on `http://localhost` (Windows & macOS desktop).
+  - Running GeoPort on a LAN IP / headless server and want Stadia there too? Click the **`🔑` key icon** next to the map selector (or set `stadia_api_key` below) to paste a free personal [Stadia Maps](https://stadiamaps.com/) API key.
+
+### Live GitHub Sync & Custom Local Overrides
+
+GeoPort automatically syncs new or updated map providers from [`MAP_LAYERS.json`](https://github.com/davesc63/GeoPort/blob/main/MAP_LAYERS.json) (or click the **`↻` sync icon** next to the map dropdown anytime) — so map URLs and styles stay fresh without needing a new app binary.
+
+You can also add your own custom XYZ tile servers, set a personal API key, or change default startup layers locally — **applied immediately on browser refresh (`F5`) with no restart or repackaging**:
+
+- **macOS / Linux**: `~/.geoport/map_layers.json` *(or `./MAP_LAYERS.json` in the working directory)*
+- **Windows**: `%USERPROFILE%\.geoport\map_layers.json`
+
+```json
+{
+  "stadia_api_key": "YOUR_OPTIONAL_FREE_STADIA_KEY",
+  "defaults": {
+    "modern_dark": "esri_dark_gray",
+    "modern_light": "esri_world_topo",
+    "classic": "esri_world_street"
+  },
+  "extra_layers": [
+    {
+      "id": "my_custom_tiles",
+      "name": "My Custom XYZ Map",
+      "category": "Custom",
+      "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "maxZoom": 19,
+      "attribution": "© OpenStreetMap contributors"
+    }
+  ]
+}
+```
+
+> **Tip for UI Tinkerers:** GeoPort v5 also checks `~/.geoport/templates/` (and `./templates/` next to the binary) *before* bundled templates — drop a customized `map_modern.html` or `map.html` there and hit refresh (`F5`) to tweak the UI live without rebuilding!
+
+---
+
 ## ⛽ Australian Fuel Mode
 
 For the 🇦🇺 Aussies 🇦🇺 chasing the sharpest bowser prices — switch to **Fuel Mode** in GeoPort to find the cheapest live fuel stations across **QLD, NSW, VIC, WA, and ACT** by fuel grade (`U91`, `E10`, `U95`, `U98`, `Diesel`, `LPG`) and jump straight to the station pin in one click!
