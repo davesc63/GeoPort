@@ -5,21 +5,23 @@
     <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/buy-me-a-beer.png" alt="Buy me a beer" height="50">
   </a>
   <br><br>
-  <a href="https://geoport.me"><strong>https://geoport.me</strong></a>
+  <a href="https://geoport.me"><strong>https://geoport.me</strong></a> &nbsp;&bull;&nbsp;
+  <a href="https://geoport.me/ios.html#waitlist"><strong>Untethered iOS Waitlist</strong></a> &nbsp;&bull;&nbsp;
+  <a href="https://geoport.me/guide.html"><strong>Instruction Guide</strong></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/davesc63/GeoPort/releases/latest">
-    <img src="https://img.shields.io/github/v/release/davesc63/GeoPort?style=for-the-badge&label=Latest%20Release&color=0ea5e9" alt="Latest Release">
+    <img src="https://img.shields.io/github/v/release/davesc63/GeoPort?style=for-the-badge&label=Desktop%20Release&color=0ea5e9" alt="Latest Desktop Release">
+  </a>
+  <a href="https://geoport.me/ios.html#waitlist">
+    <img src="https://img.shields.io/badge/iOS%20Untethered-Register%20Waitlist-14b8a6?style=for-the-badge" alt="Register for the iOS Waitlist">
+  </a>
+  <a href="https://geoport.me/guide.html">
+    <img src="https://img.shields.io/badge/Docs-Instruction%20Guide-38bdf8?style=for-the-badge" alt="Instruction Guide">
   </a>
   <a href="https://discord.gg/genRca55Nb">
     <img src="https://img.shields.io/badge/Discord-Join%20Us-5865F2?logo=discord&logoColor=white&style=for-the-badge" alt="Join Discord">
-  </a>
-  <a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">
-    <img src="https://img.shields.io/badge/Docs-FAQ%20%26%20Help-10b981?style=for-the-badge" alt="FAQ">
-  </a>
-  <a href="https://www.surveymonkey.com/r/BLQ8M75">
-    <img src="https://img.shields.io/badge/Feedback-User%20Survey-f59e0b?style=for-the-badge" alt="Survey">
   </a>
 </p>
 
@@ -30,14 +32,55 @@
 
 ---
 
-> ### 📱 NEW BREAKTHROUGH: GeoPort Untethered iOS App (`.ipa` Beta)
-> Run GeoPort **100% standalone directly on your iPhone** — no PC, Mac, or cable attached while spoofing! Sideloads in minutes with any **$0 Free Apple ID** via **SideStore + LocalDevVPN**.
-> - 👉 **[Step-by-Step Setup Guide & SideStore 1-Tap Install (`geoport.me/ios.html`)](https://geoport.me/ios.html)**
-> - 📦 **[Direct `.IPA` Downloads (`v5.0.4-ios` Pre-Release)](https://github.com/davesc63/GeoPort/releases/tag/v5.0.4-ios)**
+## 📱 NEW BREAKTHROUGH: GeoPort Untethered iOS App (`v5.1` Beta)
+
+Run GeoPort **100% standalone directly on your iPhone** — no PC, Mac, or cable attached while spoofing! Built with a native **SwiftUI + Rust CoreDevice & Userspace RSD engine**, GeoPort iOS lets you teleport anywhere on Earth, nudge with the floating Compass D-pad, cruise street-routed GPX tracks, and hold simulated GPS with your screen locked using a **$0 Free Apple ID** via **SideStore & LocalDevVPN** (plus zero-PC on-device pairing ready for iOS 27+).
+
+- 🚀 **[Register for the iOS Waitlist (`geoport.me/ios.html#waitlist`)](https://geoport.me/ios.html#waitlist)** — Controlled `v5.1` tester invite waves
+- 📖 **[Full Instruction Guide (`geoport.me/guide.html`)](https://geoport.me/guide.html)** — 4-Step Setup, Daily Controls, 5G 3-Second Handshake & Settings Reference
+
+<table align="center">
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://geoport.me/ios.html#waitlist">
+        <img src="docs/screenshots/app-teleport.png" alt="GeoPort iOS Dark Mode Spatial HUD" width="240">
+      </a>
+      <br><sub><strong>Dark Mode Spatial HUD</strong><br>3D Map, D-Pad &amp; 1-Tap Restore GPS</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://geoport.me/guide.html">
+        <img src="docs/screenshots/app-light-mode.png" alt="GeoPort iOS Contrast-Tuned Light Mode" width="240">
+      </a>
+      <br><sub><strong>Contrast-Tuned Light Mode</strong><br>Crisp Slate-Mist Daylight Controls</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://geoport.me/guide.html">
+        <img src="docs/screenshots/app-route.png" alt="GeoPort iOS Street Routes and GPX Player" width="240">
+      </a>
+      <br><sub><strong>Street Routes &amp; GPX Player</strong><br>Walk, Run, Cycle &amp; Drive Profiles</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
-**GeoPort** is a cross-platform iOS GPS location simulation studio for **Windows**, **macOS (Apple Silicon & Intel)**, and **Ubuntu Linux / Headless Servers**. Teleport anywhere on Earth, nudge your position in real time with arrow keys or the touch D-pad, replay GPX/GeoJSON tracks, or cruise along real street-routed journeys over **Wi-Fi** or **USB** — with **zero jailbreak** required.
+## 🖥️ Cross-Platform Desktop Studio: Modern Spatial HUD & Classic UI
+
+**GeoPort Desktop** is a cross-platform iOS GPS location simulation studio for **Windows**, **macOS (Apple Silicon & Intel)**, and **Ubuntu Linux / Headless Servers**. Teleport anywhere on Earth, nudge your position in real time with keyboard arrow keys or the on-screen D-pad, replay GPX/GeoJSON tracks, or cruise along real street-routed journeys over **Wi-Fi** or **USB** — with **zero jailbreak** and **zero `sudo` / Administrator elevation** required.
+
+### ✨ Desktop Modern UI (`Spatial Location Studio` — Default)
+Sleek dark glassmorphic command deck (`/?ui=modern`) with live Userspace RSD telemetry, saved pin chips, Fuel Watch, Route Builder, 21 dynamic map overlays, and a floating compass D-pad:
+
+<p align="center">
+  <img src="docs/screenshots/desktop-modern-ui.png" alt="GeoPort v5 Desktop Modern Spatial HUD UI" width="96%">
+</p>
+
+### 🎛️ Desktop Classic UI (`1-Click Switchable`)
+Prefer the original streamlined GeoPort workflow? Click **Classic UI** in the top bar (`/?ui=classic`) anytime to switch instantly with full GPX/Route drawing tools, Fuel Mode, and 1-click pairing export:
+
+<p align="center">
+  <img src="docs/screenshots/desktop-classic-ui.png" alt="GeoPort v5 Desktop Classic UI" width="96%">
+</p>
 
 ---
 
@@ -65,10 +108,9 @@ GeoPort v5 is a ground-up architectural upgrade built on the latest **`pymobiled
 - **🕹️ Live Keyboard & Touch D-Pad Control** — Nudge your live simulated GPS position smoothly using your keyboard arrow keys or the on-screen compass D-pad.
 - **📂 GPX & GeoJSON Playback** — Drag-and-drop `.gpx` or `.geojson` tracks to simulate runs, rides, and drives with live progress and pause/resume controls.
 - **📶 True Wireless Wi-Fi Workflow** — Pair once over USB, enable Wi-Fi connection, unplug the cable, and simulate wirelessly across your local network.
-- **🎨 Dual Web UI (`Spatial HUD` & `Classic`)** — Launch into the new dark glassmorphic Spatial Studio or click **Classic UI** anytime if you prefer the original GeoPort layout.
+- **🎨 Dual Web UI (`Spatial HUD` & `Classic`)** — Launch into the dark glassmorphic Spatial Studio or click **Classic UI** anytime if you prefer the original GeoPort layout.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport2.png" alt="GeoPort Interface" width="60%"><br><br>
   <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport-demo.gif" alt="GeoPort Live Demo">
 </p>
 
@@ -143,18 +185,19 @@ Apple requires **Developer Mode** to be enabled on iOS 16+ before location simul
 
 ---
 
-## 📦 Installation & Quick Start
+## 📦 Desktop Installation & Quick Start
 
-**No Python, Xcode, or command-line tools required** — GeoPort ships as a single self-contained download for every platform:
+**No Python, Xcode, or command-line tools required** — GeoPort Desktop ships as a single self-contained download for every platform:
 
-1. **Download the latest release** from [**geoport.me**](https://geoport.me) or [**GitHub Releases**](https://github.com/davesc63/GeoPort/releases/latest):
+1. **Download the latest Desktop release** from [**geoport.me**](https://geoport.me) or [**GitHub Releases**](https://github.com/davesc63/GeoPort/releases/latest):
    - **Windows 10 / 11 (x64)**: `GeoPort-Windows-v5.x.x.exe` *(install [iTunes](https://www.apple.com/itunes/) or Apple Devices from Microsoft Store so Windows has Apple's USB/Bonjour driver)*
    - **macOS Apple Silicon (M1–M4)**: `GeoPort-arm-v5.x.x.dmg`
    - **macOS Intel (x86_64)**: `GeoPort-x86-v5.x.x.dmg`
    - **Ubuntu Linux / Headless LXC (x86_64)**: `GeoPort-ubuntu-v5.x.x.zip` *(includes `systemd` service unit & headless Wi-Fi guide)*
 2. **Launch GeoPort** — no Administrator or `sudo` elevation needed! Your browser will open `http://localhost:54321` (or access `http://<server-ip>:54321` on headless Linux).
 3. **Select your iPhone/iPad** (USB or Wi-Fi), click **Connect**, drop a pin on the map, and hit **Simulate**!
-4. When finished, click **Stop GPS** (or simply reconnect anytime and click **Stop GPS** to restore real hardware GPS immediately).
+4. When finished, click **Stop GPS** (or reconnect anytime and click **Stop GPS** to restore real hardware GPS immediately).
+5. **Want 100% Untethered On-Device iOS Simulation?** Read the [**Instruction Guide**](https://geoport.me/guide.html) and [**Register for the iOS Waitlist**](https://geoport.me/ios.html#waitlist)!
 
 ---
 
