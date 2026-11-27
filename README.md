@@ -1,8 +1,11 @@
 # GeoPort v5: Your iOS Location, Anywhere! 🌍
 
+> **Want 100% untethered location simulation directly on your iPhone or iPad (no Mac/PC required)?** Explore [**GeoPort for iOS (`GeoPortApp/geoport-ios`)**](https://github.com/GeoPortApp/geoport-ios) and [**geoport.me/ios.html**](https://geoport.me/ios.html).
+
+
 <p align="center">
   <a href="https://buymeacoffee.com/davesc63">
-    <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/buy-me-a-beer.png" alt="Buy me a beer" height="50">
+    <img src="https://raw.githubusercontent.com/GeoPortApp/geoport-desktop/main/images/buy-me-a-beer.png" alt="Buy me a beer" height="50">
   </a>
   <br><br>
   <a href="https://geoport.me"><strong>https://geoport.me</strong></a> &nbsp;&bull;&nbsp;
@@ -11,8 +14,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/GeoPortApp/GeoPort/releases/latest">
-    <img src="https://img.shields.io/github/v/release/GeoPortApp/GeoPort?style=for-the-badge&label=Desktop%20Release&color=0ea5e9" alt="Latest Desktop Release">
+  <a href="https://github.com/GeoPortApp/geoport-desktop/releases/latest">
+    <img src="https://img.shields.io/github/v/release/GeoPortApp/geoport-desktop?style=for-the-badge&label=Desktop%20Release&color=0ea5e9" alt="Latest Desktop Release">
   </a>
   <a href="https://geoport.me/ios.html#waitlist">
     <img src="https://img.shields.io/badge/iOS%20Untethered-Register%20Waitlist-14b8a6?style=for-the-badge" alt="Register for the iOS Waitlist">
@@ -111,7 +114,7 @@ GeoPort v5 is a ground-up architectural upgrade built on the latest **`pymobiled
 - **🎨 Dual Web UI (`Spatial HUD` & `Classic`)** — Launch into the dark glassmorphic Spatial Studio or click **Classic UI** anytime if you prefer the original GeoPort layout.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport-demo.gif" alt="GeoPort Live Demo">
+  <img src="https://raw.githubusercontent.com/GeoPortApp/geoport-desktop/main/images/geoport-demo.gif" alt="GeoPort Live Demo">
 </p>
 
 ---
@@ -130,7 +133,7 @@ GeoPort v5.0.2+ includes **21 curated map overlays** out of the box across both 
 
 ### Live GitHub Sync & Custom Local Overrides
 
-GeoPort automatically syncs new or updated map providers from [`MAP_LAYERS.json`](https://github.com/GeoPortApp/GeoPort/blob/main/MAP_LAYERS.json) (or click the **`↻` sync icon** next to the map dropdown anytime) — so map URLs and styles stay fresh without needing a new app binary.
+GeoPort automatically syncs new or updated map providers from [`MAP_LAYERS.json`](https://github.com/GeoPortApp/geoport-desktop/blob/main/MAP_LAYERS.json) (or click the **`↻` sync icon** next to the map dropdown anytime) — so map URLs and styles stay fresh without needing a new app binary.
 
 You can also add your own custom XYZ tile servers, set a personal API key, or change default startup layers locally — **applied immediately on browser refresh (`F5`) with no restart or repackaging**:
 
@@ -167,7 +170,7 @@ You can also add your own custom XYZ tile servers, set a personal API key, or ch
 For the 🇦🇺 Aussies 🇦🇺 chasing the sharpest bowser prices — switch to **Fuel Mode** in GeoPort to find the cheapest live fuel stations across **QLD, NSW, VIC, WA, and ACT** by fuel grade (`U91`, `E10`, `U95`, `U98`, `Diesel`, `LPG`) and jump straight to the station pin in one click!
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/fuel.png" alt="GeoPort Fuel Mode" width="55%">
+  <img src="https://raw.githubusercontent.com/GeoPortApp/geoport-desktop/main/images/fuel.png" alt="GeoPort Fuel Mode" width="55%">
 </p>
 
 ---
@@ -180,7 +183,7 @@ Apple requires **Developer Mode** to be enabled on iOS 16+ before location simul
 - **Passcode / Face ID Enabled**: GeoPort v5 automatically reveals the hidden **Developer Mode** menu in `Settings → Privacy & Security → Developer Mode` on your iPhone so you can toggle it on **without removing your passcode**.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/devmode.png" alt="Developer Mode" width="50%">
+  <img src="https://raw.githubusercontent.com/GeoPortApp/geoport-desktop/main/images/devmode.png" alt="Developer Mode" width="50%">
 </p>
 
 ---
@@ -189,7 +192,7 @@ Apple requires **Developer Mode** to be enabled on iOS 16+ before location simul
 
 **No Python, Xcode, or command-line tools required** — GeoPort Desktop ships as a single self-contained download for every platform:
 
-1. **Download the latest Desktop release** from [**geoport.me**](https://geoport.me) or [**GitHub Releases**](https://github.com/GeoPortApp/GeoPort/releases/latest):
+1. **Download the latest Desktop release** from [**geoport.me**](https://geoport.me) or [**GitHub Releases**](https://github.com/GeoPortApp/geoport-desktop/releases/latest):
    - **Windows 10 / 11 (x64)**: `GeoPort-Windows-v5.x.x.exe` *(install [iTunes](https://www.apple.com/itunes/) or Apple Devices from Microsoft Store so Windows has Apple's USB/Bonjour driver)*
    - **macOS Apple Silicon (M1–M4)**: `GeoPort-arm-v5.x.x.dmg`
    - **macOS Intel (x86_64)**: `GeoPort-x86-v5.x.x.dmg`
@@ -216,6 +219,6 @@ If GeoPort helps you out, please consider buying me a beer so I can keep support
 
 <p align="center">
   <a href="https://buymeacoffee.com/davesc63">
-    <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/buy-me-a-beer.png" alt="Buy me a beer" height="50">
+    <img src="https://raw.githubusercontent.com/GeoPortApp/geoport-desktop/main/images/buy-me-a-beer.png" alt="Buy me a beer" height="50">
   </a>
 </p>
