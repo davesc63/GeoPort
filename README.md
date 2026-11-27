@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/davesc63/GeoPort/releases/latest">
-    <img src="https://img.shields.io/github/v/release/davesc63/GeoPort?style=for-the-badge&label=Desktop%20Release&color=0ea5e9" alt="Latest Desktop Release">
+  <a href="https://github.com/GeoPortApp/GeoPort/releases/latest">
+    <img src="https://img.shields.io/github/v/release/GeoPortApp/GeoPort?style=for-the-badge&label=Desktop%20Release&color=0ea5e9" alt="Latest Desktop Release">
   </a>
   <a href="https://geoport.me/ios.html#waitlist">
     <img src="https://img.shields.io/badge/iOS%20Untethered-Register%20Waitlist-14b8a6?style=for-the-badge" alt="Register for the iOS Waitlist">
@@ -130,7 +130,7 @@ GeoPort v5.0.2+ includes **21 curated map overlays** out of the box across both 
 
 ### Live GitHub Sync & Custom Local Overrides
 
-GeoPort automatically syncs new or updated map providers from [`MAP_LAYERS.json`](https://github.com/davesc63/GeoPort/blob/main/MAP_LAYERS.json) (or click the **`↻` sync icon** next to the map dropdown anytime) — so map URLs and styles stay fresh without needing a new app binary.
+GeoPort automatically syncs new or updated map providers from [`MAP_LAYERS.json`](https://github.com/GeoPortApp/GeoPort/blob/main/MAP_LAYERS.json) (or click the **`↻` sync icon** next to the map dropdown anytime) — so map URLs and styles stay fresh without needing a new app binary.
 
 You can also add your own custom XYZ tile servers, set a personal API key, or change default startup layers locally — **applied immediately on browser refresh (`F5`) with no restart or repackaging**:
 
@@ -189,7 +189,7 @@ Apple requires **Developer Mode** to be enabled on iOS 16+ before location simul
 
 **No Python, Xcode, or command-line tools required** — GeoPort Desktop ships as a single self-contained download for every platform:
 
-1. **Download the latest Desktop release** from [**geoport.me**](https://geoport.me) or [**GitHub Releases**](https://github.com/davesc63/GeoPort/releases/latest):
+1. **Download the latest Desktop release** from [**geoport.me**](https://geoport.me) or [**GitHub Releases**](https://github.com/GeoPortApp/GeoPort/releases/latest):
    - **Windows 10 / 11 (x64)**: `GeoPort-Windows-v5.x.x.exe` *(install [iTunes](https://www.apple.com/itunes/) or Apple Devices from Microsoft Store so Windows has Apple's USB/Bonjour driver)*
    - **macOS Apple Silicon (M1–M4)**: `GeoPort-arm-v5.x.x.dmg`
    - **macOS Intel (x86_64)**: `GeoPort-x86-v5.x.x.dmg`

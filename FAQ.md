@@ -16,7 +16,7 @@ Current Version: v2.2.0
 - Click from point to point to create a route / track on the map
 - Select `Download` to save your track
   
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/create-track.gif" width="65%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/create-track.gif" width="65%">
 
 # Import / Save markers on the map
 - Select the `Upload` button
@@ -24,7 +24,7 @@ Current Version: v2.2.0
 - Information is loaded to the map
 - You can select the `Download` button to save your markers to a file
 - 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/import-markers.gif" width="65%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/import-markers.gif" width="65%">
 
 # Replay a track / auto-walk with speed selection
 - Select the `Upload` button
@@ -32,7 +32,7 @@ Current Version: v2.2.0
 - Select the `Speed` button
 - Choose the playback speed (walk = 6km/h, run = 12km/h, ride = 20km/h, drive = 50km/h, custom = 3 digit input in km/h)
 - 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/gpx-play.gif" width="65%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/gpx-play.gif" width="65%">
 
 # Update / Save markers on the map
 - Double-click the map to place an icon
@@ -40,7 +40,7 @@ Current Version: v2.2.0
 - Enter the details of the location
 - Select `Download` to save your marker information to a file
 - 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/update-markers.gif" width="65%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/update-markers.gif" width="65%">
 
 
 
@@ -52,7 +52,7 @@ Thanks to some updates in <a href="https://github.com/doronz88/pymobiledevice3">
 
 You will need to connect at least once with a USB cable to create / accept the pairing request. This enables the wifi connection to then be discovered after.
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-wifi.png" width="65%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-wifi.png" width="65%">
 
 
 **Please note**: 
@@ -62,27 +62,27 @@ If your device doesn't appear in the list. Unlock your device, hit refresh a few
 
 
 # Location Notifications
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-notifications-demo.gif">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-notifications-demo.gif">
 
 ## How to install Mac version
 MacOS installation has been improved to use the Apple DMG process
 I don't have a developer certificate to sign the app, so you will get some popups the first time after downloading.
 Open the DMG file then you can run GeoPort directly there, or you can drag it into your Applications folder
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-dmg.png" width="75%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-dmg.png" width="75%">
 
 
 ### Additional Mac installation steps - One time only
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-verify.png" width="20%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-verify.png" width="20%">
 <br>
 Open `Settings` 
 Select `Privacy & Security`
 Select `Open`
 <br>
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-open.png" width="60%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-open.png" width="60%">
 <br>
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-open2.png" width="60%">
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-open2.png" width="60%">
 
 ## FAQ / Troubleshooting
 
@@ -100,14 +100,14 @@ If GeoPort is already installed, you can change this setting by going into:
 1. Allow both `Public` and `Private`
 2. Delete the entry for GeoPort. Re-run GeoPort and when prompted to allow connects - select both checkboxes
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-win-fw1.png"></img>
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-win-fw1.png"></img>
 ### Figure 1 - Windows Firewall in Control Panel
 
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-win-fw2.png"></img>
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-win-fw2.png"></img>
 ### Figure 2 - Windows firewall incoming rules
 
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/geoport-win-fw3.png"></img>
+<img src="https://github.com/GeoPortApp/GeoPort/blob/main/images/geoport-win-fw3.png"></img>
 ### Figure 3 - Network adapter pop-up on first run
 
 ### Supported iOS
@@ -120,4 +120,4 @@ MacOS Intel
 Linux - Ubuntu 22.04
 
 # Need more help?
-Please open an issue: https://github.com/davesc63/GeoPort/issues
+Please open an issue: https://github.com/GeoPortApp/GeoPort/issues
